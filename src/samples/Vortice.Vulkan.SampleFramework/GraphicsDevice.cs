@@ -37,8 +37,15 @@ public unsafe sealed class GraphicsDevice : IDisposable
 
         if (enableValidation)
         {
-            // Determine the optimal validation layers to enable that are necessary for useful debugging
-            GetOptimalValidationLayers(availableInstanceLayers, instanceLayers);
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Console.Error.WriteLine("Molten-VK on macOS does not support Validation Layers.");
+            }
+            else
+            {
+                // Determine the optimal validation layers to enable that are necessary for useful debugging
+                GetOptimalValidationLayers(availableInstanceLayers, instanceLayers);
+            }
         }
 
         // Check if VK_EXT_debug_utils is supported, which supersedes VK_EXT_Debug_Report
@@ -52,6 +59,10 @@ public unsafe sealed class GraphicsDevice : IDisposable
             else if (availableExtension == VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME)
             {
                 instanceExtensions.Add(VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME);
+            }
+            else if (availableExtension == VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME)
+            {
+                instanceExtensions.Add(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
             }
         }
 
@@ -78,6 +89,10 @@ public unsafe sealed class GraphicsDevice : IDisposable
             enabledExtensionCount = vkInstanceExtensions.Length,
             ppEnabledExtensionNames = vkInstanceExtensions
         };
+        if (instanceExtensions.Contains(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME))
+        {
+            instanceCreateInfo.flags |= VkInstanceCreateFlags.EnumeratePortabilityKHR;
+        }
 
         VkDebugUtilsMessengerCreateInfoEXT debugUtilsCreateInfo = new();
 

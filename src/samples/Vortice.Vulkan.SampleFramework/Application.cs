@@ -67,6 +67,8 @@ public abstract class Application : IDisposable
     [UnmanagedCallersOnly]
     private static unsafe void GlfwError(int code, sbyte* message)
     {
-        throw new Exception(new string(message));
+        var error = new string(message) + Environment.NewLine
+                  + new System.Diagnostics.StackTrace().ToString();
+        throw new Exception(error);
     }
 }
